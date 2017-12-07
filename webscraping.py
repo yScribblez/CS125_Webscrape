@@ -1,10 +1,10 @@
-mport json
+import json
 import requests
 import praw
 
 with open('api_keys.json') as f:
     api_keys = json.loads(f.read())
-
+    
 reddit_titles_to_comments = {}
 reddit_links = []
 r = requests.get(
@@ -20,6 +20,11 @@ for x in reddit_json['data']['children']:
     reddit_links.append('https://reddit.com' + x['data']['permalink'])
     
 reddit = praw.Reddit(
+    client_id=api_keys['client_id'],
+    client_secret=api_keys['client_secret'],
+    password=api_keys['password'],
+    user_agent=api_keys['user_agent'],
+    username=api_keys['username']
     # your info here
 )
 submission = reddit.submission(url=reddit_links[0])
