@@ -9,4 +9,4 @@ Team: Lawson Probasco and Susie Lee
 
 Instructions:
 1. $ pip3 install -r requirements.txt
-2. $pip3 python3 final.py
+2. $ pip3 python3 final.py
