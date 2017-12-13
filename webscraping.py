@@ -1,28 +1,43 @@
 import json
 import requests
 import praw
+from nltk.classify import NaiveBayesClassifier
+from nltk.corpus import subjectivity
+from nltk.sentiment import SentimentAnalyzer
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from nltk import tokenize
+from nltk.sentiment.util import *
 
-with open('api_keys.json') as f:
-    api_keys = json.loads(f.read())
-    
-reddit = praw.Reddit(
-    client_id=api_keys['client_id'],
-    client_secret=api_keys['client_secret'],
-    password=api_keys['password'],
-    user_agent=api_keys['user_agent'],
-    username=api_keys['username']
-    # your info here
-)
-reddit_titles_to_comments = {}
-submissions = reddit.subreddit('all').hot(limit=100)
+def organize():
+    with open('api_keys.json') as f:
+        api_keys = json.loads(f.read())
 
+    reddit = praw.Reddit(
+        client_id=api_keys['client_id'],
+        client_secret=api_keys['client_secret'],
+        password=api_keys['password'],
+        user_agent=api_keys['user_agent'],
+        username=api_keys['username']
+        # your info here
+    )
+    post = {}
+    reddit_titles_to_comments = {}
+    submissions = reddit.subreddit('all').hot(limit=4) #1 post
+    for submission in submissions: #for post in posts
+        submission.comments.replace_more(limit=1) #0 means head comments
+        for comment in submission.comments.list():
+            reddit_titles_to_comments[submission.title] = [comment.body for comment in submission.comments.list()]
+        sentences = reddit_titles_to_comments[submission.title]
+        sid = SentimentIntensityAnalyzer()
+        compound = 0
+        for sentence in sentences:
+            ss = sid.polarity_scores(sentence)
+            compound += (ss['compound'])
+        post[submission.title] = ("title: " + str(sid.polarity_scores(submission.title)['compound']), "comments: " + str(compound/len(sentences)))
+        #something[submission.title] /= len(sentences)
+    print(post)
+        #for k in ss:
+            #print('{0}: {1}, '.format(k, ss[k]), end='')
+        #print()
 
-
-for submission in submissions:
-    submission = reddit.submission(url=link)
-    submission.comments.replace_more(limit=0)
-    for comment in submission.comments.list():
-        print(comment.body)
-# okay so i have currently gathered all the comments from a given submission, but i'm thinking i can do two separate
-# analysis here: one in which i analyze title sentiment to comment sentiment, and another where i analyze
-# comment sentiment to subreddit to determine which subs have the most positive comment community
+organize()
